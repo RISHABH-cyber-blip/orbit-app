@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Orbit",
+    "slug": "orbit-native",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "orbit",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.orbit.student"
+    },
+    "android": {
+      "package": "com.orbit.student",
+      "adaptiveIcon": {
+        "backgroundColor": "#14171F"
+      },
+      "permissions": [
+        "SCHEDULE_EXACT_ALARM",
+        "RECEIVE_BOOT_COMPLETED"
+      ]
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "extra": {
+      "supabaseUrl": "https://aupiypcysntpzoybbkkf.supabase.co",
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1cGl5cGN5c250cHpveWJia2tmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0OTM5MjMsImV4cCI6MjEwMzA2OTkyM30.GHw4KrmMj2oFrv0gC7jGjKjnbFcx7bSvxCOkpCadU5Y",
+      "router": {},
+      "eas": {
+        "projectId": "4ff7f432-baa1-4569-857d-39da60977785"
+      }
+    }
+  }
+}
