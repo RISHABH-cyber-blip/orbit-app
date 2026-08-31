@@ -25,7 +25,14 @@
       ]
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#F2A65A"
+        }
+      ]
     ],
     "extra": {
       "supabaseUrl": "https://aupiypcysntpzoybbkkf.supabase.co",

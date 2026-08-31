@@ -39,7 +39,6 @@ export async function requestNotificationPermission(): Promise<boolean> {
     await Notifications.setNotificationChannelAsync("orbit-alarms", {
       name: "Orbit alarms",
       importance: Notifications.AndroidImportance.MAX,
-      sound: "default",
       vibrationPattern: [0, 250, 250, 250],
       showBadge: true,
       enableVibrate: true,
@@ -64,7 +63,6 @@ export async function scheduleClassAlarm(
     content: {
       title: "Class starting",
       body: subject,
-      sound: "default",
       data: { kind: "class", subject },
       ...Platform.select({
         android: { channelId: "orbit-alarms" },
@@ -100,7 +98,6 @@ export async function scheduleTaskAlarm(
     content: {
       title: "Task time",
       body: title,
-      sound: "default",
       data: { kind: "task", title },
       ...Platform.select({
         android: { channelId: "orbit-alarms" },
