@@ -12,7 +12,7 @@ let Notifications: any = null;
 if (!shouldSkipNotifications) {
   // Use require to avoid top-level import crash
   Notifications = require("expo-notifications");
-  
+
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,
@@ -66,6 +66,7 @@ export async function scheduleClassAlarm(
       data: { kind: "class", subject },
       ...Platform.select({
         android: { channelId: "orbit-alarms" },
+        ios: { sound: true },
       }),
     },
     trigger: {
@@ -101,6 +102,7 @@ export async function scheduleTaskAlarm(
       data: { kind: "task", title },
       ...Platform.select({
         android: { channelId: "orbit-alarms" },
+        ios: { sound: true },
       }),
     },
     trigger: {
