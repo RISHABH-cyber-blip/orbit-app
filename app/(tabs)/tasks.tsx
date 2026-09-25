@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { findFreeSlot, findSlotSmart, addDays, dayOfWeekFromDate, diffMinutes, todayStr } from "@/lib/scheduling";
 import { scheduleTaskAlarm, cancelAlarm } from "@/lib/notifications";
 import type { Task, Profile, TimetableEvent } from "@/lib/types";
+import * as Notifications from "expo-notifications";
 
 type Tab = "today" | "pending" | "later";
 
@@ -17,6 +18,11 @@ export default function Tasks() {
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => { init(); }, []);
+
+  async function debugCheckAlarms() {
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    Alert.alert("Scheduled alarms", `${scheduled.length} pending:\n` + scheduled.map(s => s.content.body).join("\n"));
+  }
 
   async function init() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -229,8 +235,12 @@ export default function Tasks() {
           ))}
         </View>
       )}
+      <TouchableOpacity onPress={debugCheckAlarms} style={{ marginBottom: 12 }}>
+        <Text style={{ color: "#8B8FA3", fontSize: 11 }}>Debug: check scheduled alarms</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
+
 }
 
 const styles = StyleSheet.create({
