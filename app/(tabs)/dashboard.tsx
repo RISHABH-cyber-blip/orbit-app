@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { supabase } from "@/lib/supabaseClient";
 import { todayStr } from "@/lib/scheduling";
-import type { TimetableEvent } from "@/lib/types";
+import type { TimetableEvent, Task } from "@/lib/types";
 
 function dayOfWeek(d: string): number { return new Date(d + "T00:00:00").getDay(); }
 interface DayStat { date: string; completed: number; total: number; rate: number; rejected: number; }
@@ -12,6 +12,7 @@ export default function Dashboard() {
   const [weekStats, setWeekStats] = useState<DayStat[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
   const [suggestion, setSuggestion] = useState("");
+  const [todayTasks, setTodayTasks] = useState<Task[]>([]);
 
   useEffect(() => { load(); }, []);
 
@@ -21,6 +22,9 @@ export default function Dashboard() {
 
     const { data: events } = await supabase.from("timetable_events").select("*").eq("day_of_week", dayOfWeek(todayStr()));
     setTodayEvents((events as TimetableEvent[]) || []);
+
+    const { data: taskRows } = await supabase.from("tasks").select("*").eq("task_date", todayStr()).eq("status", "pending").order("start_time");
+    setTodayTasks((taskRows as Task[]) || []);
 
     const { count } = await supabase.from("tasks").select("*", { count: "exact", head: true }).eq("status", "pending").lt("task_date", todayStr());
     setPendingCount(count || 0);
@@ -55,17 +59,20 @@ export default function Dashboard() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingBottom: 60 }}>
       <View style={styles.card}>
-        <Text style={styles.label}>Today's classes</Text>
-        {todayEvents.length === 0 ? (
-          <Text style={styles.emptyText}>Nothing scheduled today.</Text>
-        ) : (
-          todayEvents.sort((a,b)=>a.start_time.localeCompare(b.start_time)).map((ev) => (
-            <View key={ev.id} style={[styles.classRow, { borderLeftColor: ev.color }]}>
-              <Text style={styles.classTime}>{ev.start_time}</Text>
-              <Text style={styles.classSubject}>{ev.subject}</Text>
+        <Text style={styles.label}>Today's schedule</Text>
+        {(() => {
+          const combined = [
+            ...todayEvents.map((ev) => ({ id: "c-" + ev.id, time: ev.start_time, label: ev.subject, color: ev.color, kind: "class" as const })),
+            ...todayTasks.map((t) => ({ id: "t-" + t.id, time: t.start_time || "—", label: t.title, color: "#F2A65A", kind: "task" as const })),
+          ].sort((a, b) => a.time.localeCompare(b.time));
+          if (combined.length === 0) return <Text style={styles.emptyText}>Nothing scheduled today.</Text>;
+          return combined.map((item) => (
+            <View key={item.id} style={[styles.classRow, { borderLeftColor: item.color }]}>
+              <Text style={styles.classTime}>{item.time}</Text>
+              <Text style={styles.classSubject}>{item.label}{item.kind === "task" ? " (task)" : ""}</Text>
             </View>
-          ))
-        )}
+          ));
+        })()}
       </View>
 
       <View style={styles.statsRow}>

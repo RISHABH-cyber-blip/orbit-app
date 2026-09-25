@@ -49,6 +49,46 @@ export function findFreeSlot(
   return null;
 }
 
+/**
+ * Tries a normal free slot first. If the day is fully packed, it pushes sleep
+ * time later (in 15-min steps, up to 2 hours) to make room, rather than
+ * failing outright. Returns a `note` when it had to compromise, so the UI
+ * can tell the user what it did.
+ */
+export function findSlotSmart(
+  busyBlocks: ScheduleBlock[],
+  durationMinutes: number,
+  wakeTime = "07:00",
+  sleepTime = "23:00"
+): { start: string; end: string; note?: string } | null {
+  const direct = findFreeSlot(busyBlocks, durationMinutes, wakeTime, sleepTime);
+  if (direct) return direct;
+
+  // Try trimming sleep time later, 15 minutes at a time, up to 2 hours.
+  const originalSleepMin = timeToMinutes(sleepTime)!;
+  for (let trim = 15; trim <= 120; trim += 15) {
+    const pushedSleep = minutesToTime(originalSleepMin + trim);
+    const slot = findFreeSlot(busyBlocks, durationMinutes, wakeTime, pushedSleep);
+    if (slot) {
+      return { ...slot, note: `Squeezed in by trimming ${trim} min of sleep — day was fully booked.` };
+    }
+  }
+
+  // Last resort: stack it right after the latest busy block ends, even if
+  // that runs past sleep time. Better than silently not scheduling at all.
+  const busy = busyBlocks
+    .filter((b) => b.start_time && b.end_time)
+    .map((b) => timeToMinutes(b.end_time)!)
+    .sort((a, b) => b - a);
+  const latestEnd = busy[0] ?? timeToMinutes(wakeTime)!;
+  return {
+    start: minutesToTime(latestEnd),
+    end: minutesToTime(latestEnd + durationMinutes),
+    note: "Day was completely full — placed after your last scheduled item, past your usual sleep time.",
+  };
+}
+
+
 export function addDays(dateStr: string, days: number): string {
   const d = new Date(dateStr + "T00:00:00");
   d.setDate(d.getDate() + days);

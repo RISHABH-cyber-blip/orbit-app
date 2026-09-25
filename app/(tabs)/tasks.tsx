@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch, Alert } from "react-native";
 import { supabase } from "@/lib/supabaseClient";
-import { findFreeSlot, addDays, dayOfWeekFromDate, diffMinutes, todayStr } from "@/lib/scheduling";
+import { findFreeSlot, findSlotSmart, addDays, dayOfWeekFromDate, diffMinutes, todayStr } from "@/lib/scheduling";
 import { scheduleTaskAlarm, cancelAlarm } from "@/lib/notifications";
 import type { Task, Profile, TimetableEvent } from "@/lib/types";
 
@@ -62,8 +62,9 @@ export default function Tasks() {
     const dow = dayOfWeekFromDate(todayStr());
     const { data: classes } = await supabase.from("timetable_events").select("*").eq("day_of_week", dow);
     const busy = [...((classes as TimetableEvent[]) || []), ...todayTasks];
-    const slot = findFreeSlot(busy, 30, profile.wake_time, profile.sleep_time);
+    const slot = findSlotSmart(busy, 30, profile.wake_time, profile.sleep_time);
     const notifId = slot ? await scheduleTaskAlarm(todayStr(), slot.start, newTitle.trim()) : null;
+    if (slot?.note) Alert.alert("Scheduled", slot.note);
 
     await supabase.from("tasks").insert({
       user_id: userId,
@@ -144,7 +145,9 @@ export default function Tasks() {
     loadAll();
   }
 
-  const list = tab === "today" ? todayTasks : tab === "pending" ? pendingTasks : laterTasks;
+  const activeTodayTasks = todayTasks.filter((t) => t.status === "pending");
+  const completedToday = todayTasks.filter((t) => t.status === "done" || t.status === "rejected");
+  const list = tab === "today" ? activeTodayTasks : tab === "pending" ? pendingTasks : laterTasks;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: 16, paddingBottom: 60 }}>
@@ -213,6 +216,19 @@ export default function Tasks() {
           </View>
         </View>
       ))}
+
+      {tab === "today" && completedToday.length > 0 && (
+        <View style={{ marginTop: 16 }}>
+          <Text style={styles.emptyText}>Completed today ({completedToday.length})</Text>
+          {completedToday.map((t) => (
+            <View key={t.id} style={[styles.taskCard, { opacity: 0.5 }]}>
+              <Text style={[styles.taskTitle, { textDecorationLine: "line-through" }]}>
+                {t.title} {t.status === "rejected" ? "— rejected" : ""}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
     </ScrollView>
   );
 }
