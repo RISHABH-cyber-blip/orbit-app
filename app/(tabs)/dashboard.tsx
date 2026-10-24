@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { supabase } from "@/lib/supabaseClient";
-import { todayStr } from "@/lib/scheduling";
+import { todayStr, toLocalDateStr } from "@/lib/scheduling";
 import type { TimetableEvent, Task } from "@/lib/types";
 
 function dayOfWeek(d: string): number { return new Date(d + "T00:00:00").getDay(); }
@@ -30,7 +30,7 @@ export default function Dashboard() {
     setPendingCount(count || 0);
 
     const since = new Date(); since.setDate(since.getDate() - 6);
-    const sinceStr = since.toISOString().slice(0, 10);
+    const sinceStr = toLocalDateStr(since);
     const { data: recentTasks } = await supabase.from("tasks").select("task_date,status").gte("task_date", sinceStr).lte("task_date", todayStr());
 
     const byDate: Record<string, { total: number; done: number; rejected: number }> = {};
@@ -43,7 +43,7 @@ export default function Dashboard() {
     const days: DayStat[] = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date(); d.setDate(d.getDate() - i);
-      const key = d.toISOString().slice(0, 10);
+      const key = toLocalDateStr(d);
       const stat = byDate[key] || { total: 0, done: 0, rejected: 0 };
       days.push({ date: key.slice(5), completed: stat.done, total: stat.total, rejected: stat.rejected, rate: stat.total ? Math.round((stat.done / stat.total) * 100) : 0 });
     }

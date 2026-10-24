@@ -121,3 +121,8 @@ export async function cancelAlarm(notifId: string | null) {
     // already fired or cancelled — safe to ignore
   }
 }
+
+export async function cancelAllAlarms() {
+  if (shouldSkipNotifications) return;
+  await Notifications.cancelAllScheduledNotificationsAsync();
+}

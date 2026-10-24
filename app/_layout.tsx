@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { StatusBar } from "expo-status-bar";
 import { View } from "react-native";
 import { requestNotificationPermission } from "@/lib/notifications";
+import { resyncAlarms } from "@/lib/resyncAlarms";
 
 export default function RootLayout() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
@@ -17,6 +18,10 @@ export default function RootLayout() {
     requestNotificationPermission();
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (session) resyncAlarms().catch(console.error);
+  }, [session]);
 
   useEffect(() => {
     if (session === undefined) return;
