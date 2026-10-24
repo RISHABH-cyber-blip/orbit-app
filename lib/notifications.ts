@@ -64,17 +64,14 @@ export async function scheduleClassAlarm(
       title: "Class starting",
       body: subject,
       data: { kind: "class", subject },
-      ...Platform.select({
-        android: { channelId: "orbit-alarms" },
-        ios: { sound: true },
-      }),
+      ...Platform.select({ ios: { sound: true } }),
     },
     trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-      weekday,
+      type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
+      weekday, // 1 = Sunday ... 7 = Saturday (same numbering we already use)
       hour,
       minute,
-      repeats: true,
+      channelId: "orbit-alarms-v2",
     },
   });
   return id;
@@ -100,14 +97,12 @@ export async function scheduleTaskAlarm(
       title: "Task time",
       body: title,
       data: { kind: "task", title },
-      ...Platform.select({
-        android: { channelId: "orbit-alarms" },
-        ios: { sound: true },
-      }),
+      ...Platform.select({ ios: { sound: true } }),
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DATE,
       date: fireDate,
+      channelId: "orbit-alarms-v2",
     },
   });
   return id;

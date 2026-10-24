@@ -19,4 +19,13 @@ export async function resyncAlarms() {
         const id = await scheduleTaskAlarm(t.task_date, t.start_time, t.title);
         await supabase.from("tasks").update({ notif_id: id }).eq("id", t.id);
     }
+
+    for (const c of classes ?? []) {
+        try {
+            const id = await scheduleClassAlarm(c.day_of_week, c.start_time, c.subject);
+            await supabase.from("timetable_events").update({ notif_id: id }).eq("id", c.id);
+        } catch (e) {
+            console.error("Class alarm failed:", c.subject, e);
+        }
+    }
 }
