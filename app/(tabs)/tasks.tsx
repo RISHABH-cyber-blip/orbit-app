@@ -69,8 +69,14 @@ export default function Tasks() {
     const { data: classes } = await supabase.from("timetable_events").select("*").eq("day_of_week", dow);
     const busy = [...((classes as TimetableEvent[]) || []), ...todayTasks];
     const slot = findSlotSmart(busy, 30, profile.wake_time, profile.sleep_time);
-    const notifId = slot ? await scheduleTaskAlarm(todayStr(), slot.start, newTitle.trim()) : null;
-    if (slot?.note) Alert.alert("Scheduled", slot.note);
+    let notifId: string | null = null;
+    try {
+      notifId = slot ? await scheduleTaskAlarm(todayStr(), slot.start, newTitle.trim()) : null;
+      if (slot?.note) Alert.alert("Scheduled", slot.note);
+      if (slot && !notifId) Alert.alert("Alarm not set", "Task saved, but the reminder couldn't be scheduled (task time may be in the past).");
+    } catch (err: any) {
+      Alert.alert("Alarm scheduling failed", err?.message || String(err));
+    }
 
     await supabase.from("tasks").insert({
       user_id: userId,

@@ -808,3 +808,8 @@
 {"_e":"metro:bundling:progress","_t":1790345919913,"id":"3","progress":0,"total":1,"current":0}
 {"_e":"metro:bundling:progress","_t":1790345919949,"id":"3","progress":0,"total":1,"current":0}
 {"_e":"metro:bundling:done","_t":1790345920215,"id":"3","total":1,"ms":3817.3241}
+{"_e":"metro:bundling:started","_t":1790347206139,"id":"4","platform":"android","environment":null,"entry":"node_modules\\expo-router\\entry.js"}
+{"_e":"metro:bundling:progress","_t":1790347206147,"id":"4","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1790347206165,"id":"4","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1790347206449,"id":"4","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1790347206642,"id":"4","total":1,"ms":502.0355}
